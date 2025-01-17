@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BecomingCAIO Access</title>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+            text-align: center;
+        }
+        header {
+            background: #6200ea;
+            color: #fff;
+            padding: 1rem 0;
+            font-size: 1.5rem;
+        }
+        main {
+            margin: 2rem auto;
+            padding: 1rem;
+            max-width: 500px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        button {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            background: #6200ea;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #4500b5;
+        }
+        p {
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <header>Becoming Chief AI Officers Event Token-Gated Access</header>
+    <main>
+        <h2>Welcome!</h2>
+        <p>Connect your wallet to verify access.</p>
+        <button id="connect-wallet">Connect Wallet</button>
+        <p id="wallet-status"></p>
+        <p id="access-status"></p>
+        <div id="ai-agent" style="display: none;">
+            <h3>AI Agent Interface</h3>
+            <textarea id="user-query" placeholder="Ask a question..." rows="4" cols="40"></textarea><br>
+            <button id="ask-agent">Submit</button>
+            <p id="ai-response"></p>
+        </div>
+    </main>
+
+    <script>
+        const contractAddress = "0xBAe9367e6206E174bb5398A81A426c55A5eE58DE"; // Replace with your contract address
+        const abi = [
+            "function balanceOf(address account) view returns (uint256)"
+        ];
+
+        let provider;
+        let signer;
+
+        // Connect Wallet
+        document.getElementById("connect-wallet").addEventListener("click", async () => {
+            if (window.ethereum) {
+                try {
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
+                    await provider.send("eth_requestAccounts", []);
+                    signer = provider.getSigner();
+                    const walletAddress = await signer.getAddress();
+                    document.getElementById("wallet-status").innerText = `Connected: ${walletAddress}`;
+                    checkTokenBalance(walletAddress);
+                } catch (error) {
+                    console.error("Error connecting wallet:", error);
+                }
+            } else {
+                alert("MetaMask not detected! Please install MetaMask.");
+            }
+        });
+
+        // Check Token Balance
+        async function checkTokenBalance(walletAddress) {
+            try {
+                const tokenContract = new ethers.Contract(contractAddress, abi, provider);
+                const balance = await tokenContract.balanceOf(walletAddress);
+                if (balance.gt(0)) {
+                    document.getElementById("access-status").innerText = "Access Granted!";
+                    document.getElementById("ai-agent").style.display = "block";
+                } else {
+                    document.getElementById("access-status").innerText = "Access Denied: No BCAIO tokens detected.";
+                }
+            } catch (error) {
+                console.error("Error checking token balance:", error);
+            }
+        }
+
+        // AI Agent Interaction (Mocked Example)
+        document.getElementById("ask-agent").addEventListener("click", async () => {
+            const query = document.getElementById("user-query").value;
+            if (query) {
+                // Simulate AI response
+                document.getElementById("ai-response").innerText = `AI Response to "${query}"`;
+            } else {
+                document.getElementById("ai-response").innerText = "Please enter a question.";
+            }
+        });
+    </script>
+</body>
+</html>
